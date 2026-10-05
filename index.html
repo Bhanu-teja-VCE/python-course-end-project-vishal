@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vehicle Service Record Management System - Technical Case Study & Architecture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #059669;
+      --primary-light: #10b981;
+      --primary-dark: #047857;
+      --accent: #06b6d4;
+      --bg: #09110e;
+      --surface: #111d18;
+      --surface-card: #192a23;
+      --surface-border: #254438;
+      --text-main: #edfdf7;
+      --text-muted: #8faea2;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --code-bg: #0d1813;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      line-height: 1.75;
+      padding: 0;
+    }
+    header.hero {
+      background: linear-gradient(135deg, rgba(5, 150, 105, 0.18) 0%, rgba(6, 182, 212, 0.12) 100%), var(--surface);
+      border-bottom: 1px solid var(--surface-border);
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+    .badge-bar {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-primary { background: rgba(5, 150, 105, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .badge-accent { background: rgba(6, 182, 212, 0.2); color: #67e8f9; border: 1px solid rgba(6, 182, 212, 0.4); }
+    .badge-success { background: rgba(16, 185, 129, 0.2); color: #a7f3d0; border: 1px solid rgba(16, 185, 129, 0.4); }
+    h1 {
+      font-size: 2.75rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      margin-bottom: 1rem;
+      background: linear-gradient(to right, #ffffff, #d1fae5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 750px;
+      margin: 0 auto 2rem auto;
+    }
+    .meta-box {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+    }
+    .meta-box span strong { color: var(--text-main); }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+    }
+    .blog-nav {
+      position: sticky;
+      top: 1rem;
+      z-index: 100;
+      background: rgba(17, 29, 24, 0.9);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--surface-border);
+      border-radius: 12px;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      gap: 1.25rem;
+      overflow-x: auto;
+      margin-bottom: 2.5rem;
+    }
+    .blog-nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: color 0.2s;
+    }
+    .blog-nav a:hover {
+      color: var(--primary-light);
+    }
+    section {
+      margin-bottom: 3.5rem;
+      scroll-margin-top: 5rem;
+    }
+    h2 {
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      border-bottom: 2px solid var(--surface-border);
+      padding-bottom: 0.5rem;
+    }
+    h3 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: #edfdf7;
+      margin: 1.75rem 0 0.75rem 0;
+    }
+    p {
+      color: #d1fae5;
+      margin-bottom: 1.25rem;
+      font-size: 1.025rem;
+    }
+    .card {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 12px;
+      padding: 1.75rem;
+      margin: 1.5rem 0;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    .feature-card {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .feature-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--primary-light);
+    }
+    .feature-card h4 {
+      color: #34d399;
+      font-size: 1.15rem;
+      margin-bottom: 0.5rem;
+    }
+    .feature-card p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin-bottom: 0;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--surface-border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      overflow-x: auto;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+      color: #d1fae5;
+      margin: 1.25rem 0;
+    }
+    code {
+      font-family: 'Fira Code', monospace;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.88em;
+      color: #34d399;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      background: var(--surface-card);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--surface-border);
+    }
+    th, td {
+      padding: 0.9rem 1.2rem;
+      text-align: left;
+      border-bottom: 1px solid var(--surface-border);
+    }
+    th {
+      background: rgba(255, 255, 255, 0.04);
+      color: #f0fdf4;
+      font-weight: 600;
+    }
+    td {
+      color: #d1fae5;
+      font-size: 0.95rem;
+    }
+    .flow-diagram {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      margin: 2rem 0;
+    }
+    .flow-step {
+      display: inline-block;
+      background: rgba(5, 150, 105, 0.15);
+      border: 1px solid var(--primary-light);
+      padding: 0.85rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      color: #a7f3d0;
+      margin: 0.5rem;
+    }
+    .flow-arrow {
+      color: var(--accent);
+      font-size: 1.25rem;
+      margin: 0 0.25rem;
+    }
+    footer {
+      border-top: 1px solid var(--surface-border);
+      padding: 3rem 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      background: var(--surface);
+    }
+    footer a {
+      color: var(--primary-light);
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hero">
+    <div class="badge-bar">
+      <span class="badge badge-primary">Student Project</span>
+      <span class="badge badge-accent">Python 3.14</span>
+      <span class="badge badge-success">Automotive CRM & Billing</span>
+    </div>
+    <h1>Vehicle Service Record Management System</h1>
+    <p class="subtitle">An exhaustive technical case study detailing customer vehicle onboarding, two-tier cost accounting, predictive service scheduling, and revenue reconciliation.</p>
+    <div class="meta-box">
+      <span>Developer: <strong>Vishal</strong></span>
+      <span>Course Mapping: <strong>CO3, CO4, CO5</strong></span>
+      <span>Program Mapping: <strong>PO1, PO2, PO3, PO5</strong></span>
+      <span>Repository: <a href="https://github.com/Bhanu-teja-VCE/python-course-end-project-vishal" target="_blank" style="color:var(--primary-light); text-decoration: none;"><strong>python-course-end-project-vishal</strong></a></span>
+    </div>
+  </header>
+
+  <div class="container">
+    <nav class="blog-nav">
+      <a href="#overview">1. Overview</a>
+      <a href="#architecture">2. Architecture</a>
+      <a href="#features">3. Core Features</a>
+      <a href="#logic">4. Underlying Logic</a>
+      <a href="#persistence">5. Data Model</a>
+      <a href="#walkthrough">6. Code Walkthrough</a>
+      <a href="#execution">7. How to Run</a>
+      <a href="#attainment">8. CO/PO Mapping</a>
+    </nav>
+
+    <!-- SECTION 1 -->
+    <section id="overview">
+      <h2>1. Problem Statement & Project Overview</h2>
+      <p>
+        Independent automotive workshops, garage franchises, and service stations handle numerous jobs daily ranging from routine oil replacements to complex mechanical overhauls. Managing customer profiles, itemizing labour versus replacement parts, tracking odometer milestones, and alerting customers to overdue service intervals with manual logbooks frequently leads to missed revenue and unorganized records.
+      </p>
+      <p>
+        The <strong>Vehicle Service Record Management System</strong> engineered by Vishal addresses these operational challenges with a robust, terminal-driven garage management system. The software enforces relational integrity by requiring vehicles to be registered before logging maintenance, itemizes expenditure into distinct labour and spare parts subcomponents, alerts mechanics to overdue periodic maintenance schedules via date comparisons, and aggregates financial gross turnover.
+      </p>
+      <div class="grid-2">
+        <div class="feature-card">
+          <h4>Relational Registration Enforcement</h4>
+          <p>Enforces foreign-key-like constraints: service logs cannot be created for unregistered vehicle registration plates.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Predictive Maintenance Intelligence</h4>
+          <p>Compares recorded future service target dates against current system timestamps, categorizing entries into <code>Upcoming</code> versus <code>OVERDUE</code>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2 -->
+    <section id="architecture">
+      <h2>2. System Architecture & Workflow</h2>
+      <p>
+        The architecture maintains a dual-entity dictionary containing a <code>vehicles</code> registry (keyed by registration number) and a <code>services</code> transaction ledger, persisted into <code>service_data.json</code>.
+      </p>
+
+      <div class="flow-diagram">
+        <div class="flow-step">Vehicle Registration</div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-step">Job Card (Labour + Parts)</div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-step">Schedule Date Verification</div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-step">JSON Garage Ledger</div>
+      </div>
+
+      <div class="card">
+        <h3>Operational Pipeline:</h3>
+        <ol style="margin-left: 1.5rem; color: #d1fae5;">
+          <li style="margin-bottom: 0.5rem;"><strong>Registration Stage:</strong> Adds vehicle license number as unique dictionary key with customer name, phone number, and vehicle model metadata.</li>
+          <li style="margin-bottom: 0.5rem;"><strong>Job Card Generation:</strong> Queries vehicle registry. If validated, accepts job description, float-parsed labour charges, float-parsed spare parts costs, odometer reading, and optional next maintenance date.</li>
+          <li style="margin-bottom: 0.5rem;"><strong>Billing & Ledgering:</strong> Adds labour and parts, logs current ISO date, and saves to <code>services</code> list.</li>
+          <li style="margin-bottom: 0.5rem;"><strong>Inspection & Financial Audit:</strong> Computes historical expenditure per vehicle and cumulates total revenue across all past service visits.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- SECTION 3 -->
+    <section id="features">
+      <h2>3. Feature Breakdown</h2>
+      <div class="grid-2">
+        <div class="feature-card">
+          <h4>1. Vehicle & Customer Onboarding</h4>
+          <p>Sanitizes vehicle registration plates with <code>.strip().upper()</code>, preventing duplicate registrations while storing complete owner contact data.</p>
+        </div>
+        <div class="feature-card">
+          <h4>2. Granular Service Cost Logging</h4>
+          <p>Separates human labour charges from physical spare parts costs, automatically calculating total job card invoice amounts.</p>
+        </div>
+        <div class="feature-card">
+          <h4>3. Vehicle Maintenance History</h4>
+          <p>Renders a comprehensive chronologically sorted maintenance audit trail per vehicle, including cumulative financial expenditure.</p>
+        </div>
+        <div class="feature-card">
+          <h4>4. Proactive Maintenance Alerts</h4>
+          <p>Scans target maintenance dates against the current date, automatically flagging overdue services for proactive customer follow-ups.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4 -->
+    <section id="logic">
+      <h2>4. Algorithmic Deep Dive & Underlying Logic</h2>
+
+      <h3>A. Two-Tier Cost Decomposition</h3>
+      <p>
+        To preserve transparent automotive billing, labour and spare parts are collected independently and summed:
+      </p>
+      <pre><code>try:
+    labour = float(input("Enter labour cost: "))
+    parts = float(input("Enter parts cost: "))
+except ValueError:
+    print("Invalid cost.")
+    return
+
+total = labour + parts</code></pre>
+
+      <h3>B. Date Comparison for Overdue Maintenance</h3>
+      <p>
+        The system leverages lexicographical comparisons on ISO formatted date strings (<code>YYYY-MM-DD</code>) to detect overdue maintenance without complex calendar math:
+      </p>
+      <pre><code>today = datetime.now().strftime("%Y-%m-%d")
+for s in data["services"]:
+    if s["next_due"]:
+        status = "OVERDUE" if s["next_due"] < today else "Upcoming"
+        print(f"{s['number']} | Due: {s['next_due']} | {status}")</code></pre>
+      <p>Because ISO format maintains monotonic chronological ordering, <code>"2026-09-01" &lt; "2026-10-05"</code> accurately evaluates to True.</p>
+
+      <h3>C. Relational Vehicle Existence Guard</h3>
+      <p>
+        Enforces referential integrity at the application layer:
+      </p>
+      <pre><code>if number not in data["vehicles"]:
+    print("Vehicle not registered. Please register first.")
+    return</code></pre>
+    </section>
+
+    <!-- SECTION 5 -->
+    <section id="persistence">
+      <h2>5. Data Model & Storage Schema</h2>
+      <p>
+        The database is maintained in <code>service_data.json</code>:
+      </p>
+      <pre><code>{
+    "vehicles": {
+        "TS07HX4321": {
+            "owner": "Aditya Verma",
+            "phone": "9848022338",
+            "model": "Hyundai i20"
+        }
+    },
+    "services": [
+        {
+            "number": "TS07HX4321",
+            "date": "2026-10-05",
+            "service_type": "Full Synthetic Oil & Filter",
+            "labour": 800.0,
+            "parts": 2400.0,
+            "total": 3200.0,
+            "km": "35200",
+            "next_due": "2027-04-05"
+        }
+    ]
+}</code></pre>
+    </section>
+
+    <!-- SECTION 6 -->
+    <section id="walkthrough">
+      <h2>6. Comprehensive Code Walkthrough</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Function</th>
+            <th>Parameters</th>
+            <th>Primary Responsibility</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>load_data()</code></td>
+            <td>None</td>
+            <td>Reads <code>service_data.json</code> or creates seed state with empty maps.</td>
+          </tr>
+          <tr>
+            <td><code>save_data(data)</code></td>
+            <td><code>data: dict</code></td>
+            <td>Serializes the entire vehicle dictionary and service list to disk.</td>
+          </tr>
+          <tr>
+            <td><code>register_vehicle(data)</code></td>
+            <td><code>data: dict</code></td>
+            <td>Verifies uniqueness of registration number and logs owner profile.</td>
+          </tr>
+          <tr>
+            <td><code>view_customers(data)</code></td>
+            <td><code>data: dict</code></td>
+            <td>Displays all registered vehicles along with model and contact info.</td>
+          </tr>
+          <tr>
+            <td><code>add_service(data)</code></td>
+            <td><code>data: dict</code></td>
+            <td>Asserts registration existence, captures costs and odometer, records service.</td>
+          </tr>
+          <tr>
+            <td><code>service_history(data)</code></td>
+            <td><code>data: dict</code></td>
+            <td>Filters past service interventions for vehicle and totals cumulative spend.</td>
+          </tr>
+          <tr>
+            <td><code>upcoming_maintenance(data)</code></td>
+            <td><code>data: dict</code></td>
+            <td>Evaluates target dates against current date to flag overdue schedules.</td>
+          </tr>
+          <tr>
+            <td><code>total_income(data)</code></td>
+            <td><code>data: dict</code></td>
+            <td>Aggregates gross revenue across all garage repair jobs executed.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- SECTION 7 -->
+    <section id="execution">
+      <h2>7. How to Run & CLI Demo</h2>
+      <pre><code># 1. Clone or navigate to the directory
+cd 4_Vishal_Vehicle_Service
+
+# 2. Execute the service management system
+python vehicle_service_system.py</code></pre>
+
+      <div class="card">
+        <h3>Sample Terminal Interaction:</h3>
+        <pre><code>===== VEHICLE SERVICE RECORD MANAGEMENT =====
+1. Register vehicle / customer
+2. View all customers
+3. Add service record
+4. View service history of a vehicle
+5. Upcoming maintenance
+6. Total service income
+7. Exit
+Enter choice: 1
+Enter vehicle number: TS07HX4321
+Enter owner name: Aditya Verma
+Enter phone number: 9848022338
+Enter vehicle model: Hyundai i20
+Vehicle TS07HX4321 registered.
+
+===== VEHICLE SERVICE RECORD MANAGEMENT =====
+Enter choice: 3
+Enter vehicle number: TS07HX4321
+Enter service type: General Service
+Enter labour cost: 600
+Enter parts cost: 1500
+Enter current odometer reading (km): 24000
+Next service due date (YYYY-MM-DD, optional): 2027-04-01
+Service recorded. Total cost: Rs. 2100.0</code></pre>
+      </div>
+    </section>
+
+    <!-- SECTION 8 -->
+    <section id="attainment">
+      <h2>8. Academic CO & PO Attainment Matrix</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Outcome</th>
+            <th>Description & Application in this Project</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>CO3</strong></td>
+            <td>Design of modular functional architectures with dictionary-based lookup tables and sequential list iteration.</td>
+          </tr>
+          <tr>
+            <td><strong>CO4</strong></td>
+            <td>Robust exception management and error mitigation via <code>try-except</code> wrappers around user numeric entries.</td>
+          </tr>
+          <tr>
+            <td><strong>CO5</strong></td>
+            <td>Implementation of persistent structured records via JSON file storage.</td>
+          </tr>
+          <tr>
+            <td><strong>PO1, PO2</strong></td>
+            <td>Engineering knowledge & Problem analysis: Formulation of workshop ledger operations, cost breakdown accounting, and scheduled maintenance notifications.</td>
+          </tr>
+          <tr>
+            <td><strong>PO3, PO5</strong></td>
+            <td>Design/Development of solutions & Modern tool usage: Development of a maintainable terminal automotive CRM.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+  </div>
+
+  <footer>
+    <p>Vehicle Service Record Management System &bull; Developed by <strong>Vishal</strong></p>
+    <p>Repository: <a href="https://github.com/Bhanu-teja-VCE/python-course-end-project-vishal" target="_blank">github.com/Bhanu-teja-VCE/python-course-end-project-vishal</a></p>
+  </footer>
+
+</body>
+</html>
